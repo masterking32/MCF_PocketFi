@@ -68,10 +68,10 @@ async def check_cd(log):
 
 
 # Edit the following variables
-BOT_ID = "myuseragent_bot"
-REFERRAL_TOKEN = "ref_masterking32"
-SHORT_APP_NAME = None
-APP_URL = "https://api.masterking32.com/telegram_useragent.php"
+BOT_ID = "pocketfi_bot"
+REFERRAL_TOKEN = utilities.getConfig("referral_token", "365560315")
+SHORT_APP_NAME = "Mining"
+APP_URL = None
 # End of variables to edit
 
 
@@ -253,7 +253,7 @@ async def main():
 
     if utilities.is_module_disabled(bot_globals, log):
         log.info(f"<r>🚫 {module_name} module is disabled!</r>")
-        exit(0)
+        # exit(0)
 
     bot_globals["telegram_api_id"] = cfg.config["telegram_api"]["api_id"]
     bot_globals["telegram_api_hash"] = cfg.config["telegram_api"]["api_hash"]
