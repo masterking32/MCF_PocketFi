@@ -40,6 +40,7 @@ class Wallet:
                     {"chainId": "TON", "sliceProps": {"limit": 20, "offset": 0}}
                 ),
                 valid_option_response_code=200,
+                display_errors=False,
             )
 
             if response is None:
@@ -59,6 +60,7 @@ class Wallet:
                 url="/totalBalance?boostNotification=1",
                 domain="rubot",
                 valid_option_response_code=200,
+                display_errors=False,
             )
 
             if response is None:
@@ -78,6 +80,7 @@ class Wallet:
                 url="/totalBalance?",
                 domain="rubot",
                 valid_option_response_code=200,
+                display_errors=False,
             )
 
             if response is None:

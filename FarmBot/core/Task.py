@@ -29,43 +29,51 @@ class Task:
             self.log.error(f"<r>⭕ {e} failed to get tasks!</r>")
             return None
 
-    def claim_daily_rewards(self):
+    def check_daily_reward(self):
         try:
             tasks = self.get_tasks()
             for task in tasks["tasks"]["daily"]:
-                if task["code"] == "dailyReward":
-                    if task["doneAmount"] == 0:
-                        response = self.http.post(
-                            url="/boost/activateDailyBoost",
-                            domain="bot",
-                            valid_option_response_code=200,
-                        )
-                        if response is None:
-                            self.log.error(
-                                f"<r>⭕ {self.account_name} failed to claim daily rewards!</r>"
-                            )
-                            return None
-                        return response
+                if task["code"] == "dailyReward" and task["doneAmount"] == 0:
+                    self.claim_daily_rewards()
+        except Exception as e:
+            self.log.error(f"<r>⭕ {e} failed to check daily rewards!</r>")
             return None
+
+    def claim_daily_rewards(self):
+        try:
+            response = self.http.post(
+                url="/boost/activateDailyBoost",
+                domain="bot",
+                valid_option_response_code=200,
+            )
+            if response is None:
+                self.log.error(
+                    f"<r>⭕ {self.account_name} failed to claim daily rewards!</r>"
+                )
+                return None
+            return response
         except Exception as e:
             self.log.error(f"<r>⭕ {e} failed to claim daily rewards!</r>")
             return None
 
-    def confirm_subscription(self, isPyrogram=False):
-        platform = None
-        tasks = self.get_tasks()
-        for task in tasks["tasks"]["subscriptions"]:
-            if task["code"] == "subscriptionTwitter":
-                if task["doneAmount"] == 0:
-                    platform = "twitter"
-                    break
-            elif task["code"] == "subscription":
-                if task["doneAmount"] == 0 and isPyrogram:
-                    platform = "telegram"
-                    break
+    def check_subscription(self, tgAccount=None):
         try:
-            if platform is None:
-                return None
+            tasks = self.get_tasks()
+            for task in tasks["tasks"]["subscriptions"]:
+                if task["code"] == "subscriptionTwitter":
+                    if task["doneAmount"] == 0:
+                        self.confirm_subscription("twitter")
+                elif task["code"] == "subscription":
+                    if task["doneAmount"] == 0 and tgAccount is not None:
+                        self.confirm_subscription("telegram", tgAccount)
+        except Exception as e:
+            self.log.error(f"<r>⭕ {e} failed to check subscription tasks!</r>")
+            return None
+
+    def confirm_subscription(self, platform):
+        if platform is None:
+            return None
+        try:
             response = self.http.post(
                 url="/confirmSubscription",
                 domain="bot",

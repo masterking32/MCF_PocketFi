@@ -54,9 +54,6 @@ class FarmBot:
         # )
         try:
             # Login and other codes here ...
-            if self.isPyrogram and self.tgAccount is not None:
-                if getConfig("join_pocketfi", False):
-                    self.tgAccount.joinChat("pocketfi", noLog=True)
 
             self.http = HttpRequest(
                 self.log,
@@ -97,6 +94,8 @@ class FarmBot:
 
             if _alliance is not None:
                 alliance.get(_alliance)
+            else:
+                alliance.join()
 
             wallets = wallet.getList()
             wallet.getKnownTokens()
@@ -120,9 +119,6 @@ class FarmBot:
                         f"<cyan>{self.account_name}</cyan> | <g>🪙 In-App Wallet Balance: ${wallet.get('totalBalanceUsd', 0)}</g>"
                     )
 
-            if _alliance is None:
-                alliance.join()
-
             if user_mining.get("miningAmount", 0) >= 0.25:
                 claimResult = base.claim_mining()
                 if claimResult is not None:
@@ -130,14 +126,14 @@ class FarmBot:
                         f"<cyan>{self.account_name}</cyan> | <g>⛏️ Mining rewards claimed for {user_mining['miningAmount']}</g>"
                     )
 
-            dailyResult = task.claim_daily_rewards()
+            dailyResult = task.check_daily_reward()
 
             if dailyResult is not None:
                 self.log.info(
                     f"<cyan>{self.account_name}</cyan> | <g>🎯 Daily rewards claimed! Streak: {int(user_mining.get('streak', 0)) + 1}</g>"
                 )
 
-            task.confirm_subscription(isPyrogram=self.isPyrogram)
+            task.check_subscription(self.tgAccount)
 
             self.log.info(
                 f"<cyan>{self.account_name}</cyan> | <g>🤖 Farming is done.</g>"
