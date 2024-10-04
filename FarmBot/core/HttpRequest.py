@@ -89,6 +89,10 @@ class HttpRequest:
             if retries > 0:
                 self.log.info(f"🟡 <y> Unable to send request, retrying...</y>")
                 time.sleep(0.5)
+                if domain == "bot":
+                    domain = "rubot"
+                elif domain == "rubot":
+                    domain = "bot"
                 return self.get(
                     url,
                     domain,
@@ -153,6 +157,9 @@ class HttpRequest:
                 )
 
             if response.status_code != valid_response_code:
+                print(response.text)
+                print(response.json())
+                print(data)
                 self.log.error(
                     f"🔴 <red> POST Request Error: <y>{url}</y> Response code: {response.status_code}</red>"
                 )
@@ -177,6 +184,10 @@ class HttpRequest:
             if retries > 0:
                 self.log.info(f"🟡 <y> Unable to send request, retrying...</y>")
                 time.sleep(0.5)
+                if domain == "bot":
+                    domain = "rubot"
+                elif domain == "rubot":
+                    domain = "bot"
                 return self.post(
                     url,
                     domain,
@@ -233,6 +244,10 @@ class HttpRequest:
             if retries > 0:
                 self.log.info(f"🟡 <y> Unable to send option request, retrying...</y>")
                 time.sleep(0.5)
+                if domain == "bot":
+                    domain = "rubot"
+                elif domain == "rubot":
+                    domain = "bot"
                 return self.options(
                     url,
                     domain,
@@ -270,7 +285,7 @@ class HttpRequest:
             "Referer": "https://pocketfi.app/",
             "Sec-Fetch-Dest": "empty",
             "Sec-Fetch-Mode": "cors",
-            "Sec-Fetch-Site": "same-site",
+            "Sec-Fetch-Site": "cross-site",
             "User-Agent": self.user_agent,
             "pragma": "no-cache",
             "cache-control": "no-cache",
@@ -295,7 +310,7 @@ class HttpRequest:
             "Referer": "https://pocketfi.app/",
             "Sec-Fetch-Dest": "empty",
             "Sec-Fetch-Mode": "cors",
-            "Sec-Fetch-Site": "same-site",
+            "Sec-Fetch-Site": "cross-site",
             "User-Agent": self.user_agent,
             "pragma": "u=1, i",
             "cache-control": "no-cache",

@@ -8,6 +8,9 @@ import time
 
 from .core.HttpRequest import HttpRequest
 from .core.Base import Base
+from .core.Alliance import Alliance
+from .core.Task import Task
+from .core.Wallet import Wallet
 from utilities.utilities import getConfig
 from random import randint
 
@@ -63,12 +66,18 @@ class FarmBot:
                 self.account_name,
             )
             base = Base(self.log, self.http, self.account_name)
+            alliance = Alliance(self.log, self.http, self.account_name)
+            task = Task(self.log, self.http, self.account_name)
+            wallet = Wallet(self.log, self.http, self.account_name)
+
             user_mining = base.get_user_mining()
+
             if user_mining is None:
                 self.log.error(
                     f"<r>⭕ {self.account_name} failed to get user mining!</r>"
                 )
                 return
+
             if user_mining.get("userMining", None) is None:
                 registerResult = base.register_new_account()
                 if registerResult is not None:
@@ -84,26 +93,56 @@ class FarmBot:
                         return
 
             user_mining = user_mining.get("userMining", {})
+            _alliance = user_mining.get("alliance", None)
+
+            if _alliance is not None:
+                alliance.get(_alliance)
+
+            wallets = wallet.getList()
+            wallet.getKnownTokens()
+            wallet.getTotalBalance()
+            wallet.getTotalBalanceBoosted()
+
             self.log.info(
-                f"<cyan>{self.account_name}</cyan> | <g>👾 Balance: {user_mining.get('gotAmount', 0)} - Alliance: {user_mining.get('alliance', 'No alliance')}</g>"
+                f"<cyan>{self.account_name}</cyan> | <g>👾 Balance: {user_mining.get('gotAmount', 0)} $SWITCH - Alliance: {_alliance if _alliance else 'No Allianc'}</g>"
             )
-            if user_mining.get("alliance", None) is None:
-                base.join_alliance()
+
+            if wallets is not None and len(wallets) > 0:
+                wallet = wallets[0]
+                if wallet is not None:
+                    self.log.info(
+                        f"<cyan>{self.account_name}</cyan> | <g>💳 In-App ETH Address: {wallet.get('address', '0xNotFound')}</g>"
+                    )
+                    self.log.info(
+                        f"<cyan>{self.account_name}</cyan> | <g>💳 In-App TON Address: {wallet.get('tonUnbouncableAddress', 'UQ_NotFound')}</g>"
+                    )
+                    self.log.info(
+                        f"<cyan>{self.account_name}</cyan> | <g>🪙 In-App Wallet Balance: ${wallet.get('totalBalanceUsd', 0)}</g>"
+                    )
+
+            if _alliance is None:
+                alliance.join()
+
             if user_mining.get("miningAmount", 0) >= 0.25:
                 claimResult = base.claim_mining()
                 if claimResult is not None:
                     self.log.info(
                         f"<cyan>{self.account_name}</cyan> | <g>⛏️ Mining rewards claimed for {user_mining['miningAmount']}</g>"
                     )
-            dailyResult = base.claim_daily_rewards()
+
+            dailyResult = task.claim_daily_rewards()
+
             if dailyResult is not None:
                 self.log.info(
-                    f"<cyan>{self.account_name}</cyan> | <g>🎯 Daily rewards claimed! Streak: {dailyResult.get('updatedForDay', 0)}</g>"
+                    f"<cyan>{self.account_name}</cyan> | <g>🎯 Daily rewards claimed! Streak: {int(user_mining.get('streak', 0)) + 1}</g>"
                 )
-            base.confirm_subscription(isPyrogram=self.isPyrogram)
+
+            task.confirm_subscription(isPyrogram=self.isPyrogram)
+
             self.log.info(
                 f"<cyan>{self.account_name}</cyan> | <g>🤖 Farming is done.</g>"
             )
+
         except Exception as e:
             self.log.error(
                 f"<cyan>{self.account_name}</cyan> | <r>⭕ failed to run!</r>"
@@ -112,6 +151,7 @@ class FarmBot:
                 f"<cyan>{self.account_name}</cyan> | <r>⭕ Error (For devs): {e}</r>"
             )
             return
+
         finally:
             if getConfig("random_sleep", False):
                 sleepFor = randint(5, 30)
