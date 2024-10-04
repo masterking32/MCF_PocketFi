@@ -8,6 +8,7 @@ import time
 
 from .core.HttpRequest import HttpRequest
 from .core.Base import Base
+from utilities.utilities import getConfig
 from random import randint
 
 
@@ -50,6 +51,10 @@ class FarmBot:
         # )
         try:
             # Login and other codes here ...
+            if self.isPyrogram and self.tgAccount is not None:
+                if getConfig("join_pocketfi", False):
+                    self.tgAccount.joinChat("pocketfi", noLog=True)
+
             self.http = HttpRequest(
                 self.log,
                 self.proxy,
@@ -93,8 +98,9 @@ class FarmBot:
             dailyResult = base.claim_daily_rewards()
             if dailyResult is not None:
                 self.log.info(
-                    f"<cyan>{self.account_name}</cyan> | <g>🎯 Daily rewards claimed</g>"
+                    f"<cyan>{self.account_name}</cyan> | <g>🎯 Daily rewards claimed! Streak: {dailyResult.get('updatedForDay', 0)}</g>"
                 )
+            base.confirm_subscription(isPyrogram=self.isPyrogram)
             self.log.info(
                 f"<cyan>{self.account_name}</cyan> | <g>🤖 Farming is done.</g>"
             )
@@ -107,6 +113,7 @@ class FarmBot:
             )
             return
         finally:
-            sleepFor = randint(5, 30)
-            self.log.info(f"<y>⏳ sleeping for {sleepFor} seconds...</y>")
-            time.sleep(sleepFor)
+            if getConfig("random_sleep", False):
+                sleepFor = randint(5, 30)
+                self.log.info(f"<y>⏳ sleeping for {sleepFor} seconds...</y>")
+                time.sleep(sleepFor)

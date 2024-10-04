@@ -49,7 +49,7 @@ class Base:
             self.log.error(f"<r>⭕ {e} failed to claim mining rewards!</r>")
             return None
 
-    def claim_daily_rewards(self):
+    def get_tasks(self):
         try:
             response = self.http.get(
                 url="/mining/taskExecuting",
@@ -58,25 +58,31 @@ class Base:
             )
 
             if response is None:
-                self.log.error(
-                    f"<r>⭕ {self.account_name} failed to claim daily rewards!</r>"
-                )
+                self.log.error(f"<r>⭕ {self.account_name} failed to get tasks!</r>")
                 return None
-            for task in response["tasks"]["daily"]:
+
+            return response
+        except Exception as e:
+            self.log.error(f"<r>⭕ {e} failed to get tasks!</r>")
+            return None
+
+    def claim_daily_rewards(self):
+        try:
+            tasks = self.get_tasks()
+            for task in tasks["tasks"]["daily"]:
                 if task["code"] == "dailyReward":
-                    # TODO
-                    if task["currentDay"] == 0:
-                        _response = self.http.post(
+                    if task["doneAmount"] == 0:
+                        response = self.http.post(
                             url="/boost/activateDailyBoost",
                             domain="bot",
                             valid_option_response_code=200,
                         )
-                        if _response is None:
+                        if response is None:
                             self.log.error(
                                 f"<r>⭕ {self.account_name} failed to claim daily rewards!</r>"
                             )
                             return None
-                        return _response
+                        return response
             return None
         except Exception as e:
             self.log.error(f"<r>⭕ {e} failed to claim daily rewards!</r>")
@@ -88,6 +94,7 @@ class Base:
                 url="/mining/alliances/set?alliance=pocketfi",
                 domain="gm",
                 valid_option_response_code=200,
+                only_json_response=False,
             )
             # No response means success
             return response
@@ -112,4 +119,36 @@ class Base:
             return response
         except Exception as e:
             self.log.error(f"<r>⭕ {e} failed to register new account!</r>")
+            return None
+
+    def confirm_subscription(self, isPyrogram=False):
+        platform = None
+        tasks = self.get_tasks()
+        for task in tasks["tasks"]["subscriptions"]:
+            if task["code"] == "subscriptionTwitter":
+                if task["doneAmount"] == 0:
+                    platform = "twitter"
+                    break
+            elif task["code"] == "subscription":
+                if task["doneAmount"] == 0 and isPyrogram:
+                    platform = "telegram"
+                    break
+        try:
+            if platform is None:
+                return None
+            response = self.http.post(
+                url="/confirmSubscription",
+                domain="bot",
+                data={"subscriptionType": platform},
+                valid_option_response_code=200,
+                only_json_response=False,
+            )
+            if response is None:
+                self.log.error(
+                    f"<r>⭕ {self.account_name} failed to confirm subscription!</r>"
+                )
+                return None
+            return response
+        except Exception as e:
+            self.log.error(f"<r>⭕ {e} failed to confirm subscription!</r>")
             return None
