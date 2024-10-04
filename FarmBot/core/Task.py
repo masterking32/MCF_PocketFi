@@ -4,6 +4,7 @@
 # Telegram: https://t.me/MasterCryptoFarmBot
 
 import json
+from utilities.utilities import getConfig
 
 
 class Task:
@@ -65,7 +66,9 @@ class Task:
                         self.confirm_subscription("twitter")
                 elif task["code"] == "subscription":
                     if task["doneAmount"] == 0 and tgAccount is not None:
-                        self.confirm_subscription("telegram", tgAccount)
+                        if getConfig("join_pocketfi", False):
+                            tgAccount.joinChat("pocketfi")
+                        self.confirm_subscription("telegram")
         except Exception as e:
             self.log.error(f"<r>⭕ {e} failed to check subscription tasks!</r>")
             return None
