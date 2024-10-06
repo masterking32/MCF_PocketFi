@@ -14,11 +14,12 @@ from .core.Wallet import Wallet
 from utilities.utilities import getConfig
 from random import randint
 
-
 MasterCryptoFarmBot_Dir = os.path.dirname(
     os.path.dirname(os.path.abspath(__file__ + "/../../"))
 )
 sys.path.append(MasterCryptoFarmBot_Dir)
+
+import mcf_utils.utils as utils
 
 
 class FarmBot:
@@ -41,20 +42,12 @@ class FarmBot:
         self.user_agent = user_agent
         self.isPyrogram = isPyrogram
         self.tgAccount = tgAccount
-        self.http = None
 
     async def run(self):
         self.log.info(
             f"<cyan>{self.account_name}</cyan> | <g>🤖 Farming is starting...</g>"
         )
-
-        # If self.tg is not None, it means you can use Pyrogram...
-        # self.log.info(
-        #     f"<blue>[Development Only] URL: <c>{self.web_app_query}</c></blue>"
-        # )
         try:
-            # Login and other codes here ...
-
             self.http = HttpRequest(
                 self.log,
                 self.proxy,
@@ -103,17 +96,17 @@ class FarmBot:
             wallet.getTotalBalanceBoosted()
 
             self.log.info(
-                f"<cyan>{self.account_name}</cyan> | <g>👾 Balance: {user_mining.get('gotAmount', 0)} $SWITCH - Alliance: {_alliance if _alliance else 'No Allianc'}</g>"
+                f"<cyan>{self.account_name}</cyan> | <g>👾 Balance: {user_mining.get('gotAmount', 0)} $SWITCH - Alliance: {_alliance if _alliance else 'No Alliance'}</g>"
             )
 
             if wallets is not None and len(wallets) > 0:
                 wallet = wallets[0]
                 if wallet is not None:
                     self.log.info(
-                        f"<cyan>{self.account_name}</cyan> | <g>💳 In-App ETH Address: {wallet.get('address', '0xNotFound')}</g>"
+                        f"<cyan>{self.account_name}</cyan> | <g>💳 In-App ETH Address: {utils.hide_text(wallet.get('address', '0xNotFound'))}</g>"
                     )
                     self.log.info(
-                        f"<cyan>{self.account_name}</cyan> | <g>💳 In-App TON Address: {wallet.get('tonUnbouncableAddress', 'UQ_NotFound')}</g>"
+                        f"<cyan>{self.account_name}</cyan> | <g>💳 In-App TON Address: {utils.hide_text(wallet.get('tonUnbouncableAddress', 'UQ_NotFound'))}</g>"
                     )
                     self.log.info(
                         f"<cyan>{self.account_name}</cyan> | <g>🪙 In-App Wallet Balance: ${wallet.get('totalBalanceUsd', 0)}</g>"
