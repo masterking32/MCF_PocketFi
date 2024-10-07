@@ -126,7 +126,7 @@ class FarmBot:
                     f"<cyan>{self.account_name}</cyan> | <g>🎯 Daily rewards claimed! Streak: {int(user_mining.get('streak', 0)) + 1}</g>"
                 )
 
-            task.check_subscription(self.tgAccount)
+            await task.check_subscription(self.tgAccount)
 
             self.log.info(
                 f"<cyan>{self.account_name}</cyan> | <g>🤖 Farming is done.</g>"
