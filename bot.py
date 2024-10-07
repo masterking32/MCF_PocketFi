@@ -12,7 +12,6 @@ import asyncio
 from pathlib import Path
 import threading
 import hashlib
-import requests
 
 import utilities.utilities as utilities
 from FarmBot.FarmBot import FarmBot
@@ -111,7 +110,7 @@ async def process_pg_account(account, bot_globals, log, group_id=None):
             return
 
         log.info(
-            f"<g>🔆 Start processing Pyrogram account <c>{account['session_name']}</c> from group <c>{group_id}</c> ...</g>"
+            f"<g>🔆 Start processing Pyrogram/Telethon account <c>{account['session_name']}</c> from group <c>{group_id}</c> ...</g>"
         )
 
         if account.get("proxy") == "":
@@ -135,7 +134,7 @@ async def process_pg_account(account, bot_globals, log, group_id=None):
             )
             return
 
-        web_app_query = tg.getTGWebQuery(web_app_data)
+        web_app_query = utils.extract_tg_query_from_url(web_app_data)
         if not web_app_query:
             log.error(
                 f"<r>└─ ❌ Account <c>{account['session_name']}</c> from group <c>{group_id}</c> WebApp query is not valid!</r>"
@@ -159,12 +158,12 @@ async def process_pg_account(account, bot_globals, log, group_id=None):
         await fb.run()
     except Exception as e:
         log.error(
-            f"<r>❌ Account <c>{account['session_name']}</c> from group <c>{group_id}</c>, Error processing Pyrogram account: {e}</r>"
+            f"<r>❌ Account <c>{account['session_name']}</c> from group <c>{group_id}</c>, Error processing Pyrogram/Telethon account: {e}</r>"
         )
         return False
     finally:
         log.info(
-            f"<g>✅ Pyrogram account <c>{account['session_name']}</c> from group <c>{group_id}</c> has been processed.</g>"
+            f"<g>✅ Pyrogram/Telethon account <c>{account['session_name']}</c> from group <c>{group_id}</c> has been processed.</g>"
         )
 
 
@@ -194,8 +193,7 @@ async def process_module_account(account, bot_globals, log, group_id=None):
             )
             return
 
-        tg_tmp = tgAccount()
-        web_app_query = tg_tmp.getTGWebQuery(web_app_data)
+        web_app_query = utils.extract_tg_query_from_url(web_app_data)
         if not web_app_query:
             log.error(
                 f"<r>❌ Account {account_name} from group <c>{group_id}</c> WebApp query is not valid!</r>"
@@ -242,11 +240,12 @@ async def handle_accounts(group_id, accounts, bot_globals, log):
                 continue
     except Exception as e:
         log.error(f"<r>❌ Error processing group <c>{group_id}</c> accounts: {e}</r>")
-        return False
     finally:
         log.info(
             f"<g>🔚 Group <c>{group_id}</c> with <c>{len(accounts)}</c> accounts has been processed. Waiting for other groups' tasks to finish</g>"
         )
+
+    await asyncio.sleep(5)
 
 
 def load_accounts():
@@ -372,7 +371,7 @@ async def main():
                 continue
 
             log.info(
-                f"<g>👥 Found <c>{len(all_accounts)}</c> accounts: <c>{pyrogram_accounts}</c> Pyrogram accounts, <c>{module_accounts}</c> module accounts.</g>"
+                f"<g>👥 Found <c>{len(all_accounts)}</c> accounts: <c>{pyrogram_accounts}</c> Pyrogram/Telethon accounts, <c>{module_accounts}</c> module accounts.</g>"
             )
 
             if pyrogram_accounts > 0 and (
@@ -475,7 +474,7 @@ async def main():
             )
             await check_cd(log)
         except Exception as e:
-            log.error(f"<r>❌ Error processing Pyrogram accounts: {e}</r>")
+            log.error(f"<r>❌ Error processing Pyrogram/Telethon accounts: {e}</r>")
             await check_cd(log)
         except KeyboardInterrupt:
             log.info(f"<r>🛑 Bot Module interrupted by user ...</r>")
@@ -484,6 +483,8 @@ async def main():
 
 if __name__ == "__main__":
     try:
+        if sys.platform == "win32":
+            asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
         asyncio.run(main())
     except KeyboardInterrupt:
         print(f"{lc.r}🛑 Bot Module interrupted by user ... {lc.rs}")
