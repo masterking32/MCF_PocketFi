@@ -57,7 +57,7 @@ class Task:
             self.log.error(f"<r>⭕ {e} failed to claim daily rewards!</r>")
             return None
 
-    def check_subscription(self, tgAccount=None):
+    async def check_subscription(self, tgAccount=None):
         try:
             tasks = self.get_tasks()
             for task in tasks["tasks"]["subscriptions"]:
@@ -67,7 +67,7 @@ class Task:
                 elif task["code"] == "subscription":
                     if task["doneAmount"] == 0 and tgAccount is not None:
                         if getConfig("join_pocketfi", False):
-                            tgAccount.joinChat("pocketfi")
+                            await tgAccount.joinChat("pocketfi")
                         self.confirm_subscription("telegram")
         except Exception as e:
             self.log.error(f"<r>⭕ {e} failed to check subscription tasks!</r>")
