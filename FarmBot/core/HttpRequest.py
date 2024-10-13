@@ -51,7 +51,7 @@ class HttpRequest:
         try:
             url = self._fix_url(url, domain)
             default_headers = (
-                self._get_default_headers() if "pocketfi.orgs" in url else {}
+                self._get_default_headers() if "pocketfi.org" in url else {}
             )
 
             if headers is None:
@@ -131,7 +131,7 @@ class HttpRequest:
         try:
             url = self._fix_url(url, domain)
             default_headers = (
-                self._get_default_headers() if "pocketfi.orgs" in url else {}
+                self._get_default_headers() if "pocketfi.org" in url else {}
             )
 
             if headers is None:
