@@ -51,7 +51,7 @@ class HttpRequest:
         try:
             url = self._fix_url(url, domain)
             default_headers = (
-                self._get_default_headers() if "pocketfi.orgs" in url else {}
+                self._get_default_headers() if "pocketfi.org" in url else {}
             )
 
             if headers is None:
@@ -77,6 +77,7 @@ class HttpRequest:
                 url=url,
                 headers=default_headers,
                 proxies=self._get_proxy(),
+                timeout=30,
             )
 
             if response.status_code != valid_response_code:
@@ -131,7 +132,7 @@ class HttpRequest:
         try:
             url = self._fix_url(url, domain)
             default_headers = (
-                self._get_default_headers() if "pocketfi.orgs" in url else {}
+                self._get_default_headers() if "pocketfi.org" in url else {}
             )
 
             if headers is None:
@@ -160,12 +161,14 @@ class HttpRequest:
                     headers=default_headers,
                     data=data,
                     proxies=self._get_proxy(),
+                    timeout=30,
                 )
             else:
                 response = requests.post(
                     url=url,
                     headers=default_headers,
                     proxies=self._get_proxy(),
+                    timeout=30,
                 )
 
             if response.status_code != valid_response_code:
@@ -244,6 +247,7 @@ class HttpRequest:
                 url=url,
                 headers=default_headers,
                 proxies=self._get_proxy(),
+                timeout=30,
             )
 
             if response.status_code != valid_response_code:

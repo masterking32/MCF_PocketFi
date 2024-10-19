@@ -90,7 +90,7 @@ def load_json_file(file_path, default=None):
         if not os.path.exists(file_path):
             return default
 
-        with open(file_path, "r") as f:
+        with open(file_path, "r", encoding="utf-8") as f:
             json_result = json.load(f)
             if not json_result or len(json_result) == 0:
                 return default
@@ -253,12 +253,16 @@ def load_accounts():
     pyrogram_accounts_count = 0
     module_accounts_count = 0
     all_accounts = []
+    disabled_accounts = load_json_file(MODULE_DISABLED_SESSIONS_FILE, [])
 
     try:
         pyrogram_accounts = load_json_file(PYROGRAM_ACCOUNTS_FILE, None)
         if pyrogram_accounts is not None:
             for account in pyrogram_accounts:
                 if account.get("disabled", False):
+                    continue
+
+                if account["session_name"] in disabled_accounts:
                     continue
 
                 pyrogram_accounts_count += 1
@@ -333,18 +337,14 @@ async def main():
     bot_globals["license"] = license_key
     bot_globals["config"] = cfg.config
     apiObj = MCF_API(log)
-    modules = apiObj.get_modules(license_key)
+    modules = apiObj.get_user_modules(license_key)
 
     if modules is None or "error" in modules:
         log.error(f"<r>❌ Unable to get modules: {modules['error']}</r>")
         exit(1)
 
-    if "modules" not in modules:
-        log.error("<r>❌ Unable to get modules: Modules key not found!</r>")
-        exit(1)
-
     module_found = False
-    for module in modules["modules"]:
+    for module in modules:
         if module["name"] == module_name:
             module_found = True
             break
