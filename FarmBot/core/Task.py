@@ -16,7 +16,7 @@ class Task:
     def get_tasks(self):
         try:
             response = self.http.get(
-                url="/mining/taskExecuting",
+                url="/boost/tasks?boostType=general",
                 domain="bot",
                 valid_option_response_code=200,
             )
