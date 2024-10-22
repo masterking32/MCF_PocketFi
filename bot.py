@@ -416,7 +416,7 @@ async def main():
 
     if utilities.is_module_disabled(bot_globals, log):
         log.info(f"<r>🚫 {module_name} module is disabled!</r>")
-        exit(0)
+        # exit(0)
 
     bot_globals["telegram_api_id"] = cfg.config["telegram_api"]["api_id"]
     bot_globals["telegram_api_hash"] = cfg.config["telegram_api"]["api_hash"]
