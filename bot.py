@@ -87,7 +87,7 @@ REFERRAL_TOKEN = utilities.getConfig(
 )
 SHORT_APP_NAME = "Mining"
 APP_URL = None
-VERSION_HASH = "504fb8ada04b7c9f5993ff0ed065f9d1"
+VERSION_HASH = ""
 # End of variables to edit
 
 
