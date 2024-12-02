@@ -5,7 +5,24 @@
 
 import json
 import time
+import ssl
 import requests
+from requests.adapters import HTTPAdapter
+from urllib3.poolmanager import PoolManager
+
+
+class SSLContextAdapter(HTTPAdapter):
+    def __init__(self, ssl_context, **kwargs):
+        self.ssl_context = ssl_context
+        super().__init__(**kwargs)
+
+    def init_poolmanager(self, *args, **kwargs):
+        kwargs["ssl_context"] = self.ssl_context
+        return super().init_poolmanager(*args, **kwargs)
+
+
+# Create a custom SSL context
+ssl_context = ssl.create_default_context()
 
 
 class HttpRequest:
@@ -23,7 +40,7 @@ class HttpRequest:
         self.game_url = {
             "gm": "https://gm.pocketfi.org",
             "bot": "https://bot.pocketfi.org",
-            "rubot": "https://rubot.pocketfi.org",
+            "rubot": "https://bot.pocketfi.org",
         }
         self.tgWebData = tgWebData
         self.account_name = account_name
@@ -73,7 +90,10 @@ class HttpRequest:
                     display_errors=display_errors,
                 )
 
-            response = requests.get(
+            session = requests.Session()
+            adapter = SSLContextAdapter(ssl_context=ssl_context)
+            session.mount("https://", adapter)
+            response = session.get(
                 url=url,
                 headers=default_headers,
                 proxies=self._get_proxy(),
@@ -154,9 +174,11 @@ class HttpRequest:
                     display_errors=display_errors,
                 )
             response = None
-
+            session = requests.Session()
+            adapter = SSLContextAdapter(ssl_context=ssl_context)
+            session.mount("https://", adapter)
             if data:
-                response = requests.post(
+                response = session.post(
                     url=url,
                     headers=default_headers,
                     data=data,
@@ -164,7 +186,7 @@ class HttpRequest:
                     timeout=30,
                 )
             else:
-                response = requests.post(
+                response = session.post(
                     url=url,
                     headers=default_headers,
                     proxies=self._get_proxy(),
@@ -242,8 +264,10 @@ class HttpRequest:
             if headers:
                 for key, value in headers.items():
                     default_headers[key] = value
-
-            response = requests.options(
+            session = requests.Session()
+            adapter = SSLContextAdapter(ssl_context=ssl_context)
+            session.mount("https://", adapter)
+            response = session.options(
                 url=url,
                 headers=default_headers,
                 proxies=self._get_proxy(),
