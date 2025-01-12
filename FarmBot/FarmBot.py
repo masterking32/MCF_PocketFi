@@ -6,7 +6,7 @@ import sys
 import os
 import time
 
-from modules.MCF_Blum.utilities.utilities import add_account_to_display_data
+from utilities.utilities import add_account_to_display_data
 
 from .core.HttpRequest import HttpRequest
 from .core.Base import Base
