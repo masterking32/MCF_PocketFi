@@ -6,12 +6,14 @@ import sys
 import os
 import time
 
+from modules.MCF_Blum.utilities.utilities import add_account_to_display_data
+
 from .core.HttpRequest import HttpRequest
 from .core.Base import Base
 from .core.Alliance import Alliance
 from .core.Task import Task
 from .core.Wallet import Wallet
-from utilities.utilities import getConfig
+from utilities.utilities import getConfig, inc_display_data
 from random import randint
 
 MasterCryptoFarmBot_Dir = os.path.dirname(
@@ -63,6 +65,9 @@ class FarmBot:
             user_mining = base.get_user_mining()
 
             if user_mining is None:
+                add_account_to_display_data(
+                    "display_data_bot_issues.json", self.account_name
+                )
                 self.log.error(
                     f"<r>⭕ {self.account_name} failed to get user mining!</r>"
                 )
@@ -132,7 +137,22 @@ class FarmBot:
                 f"<cyan>{self.account_name}</cyan> | <g>🤖 Farming is done.</g>"
             )
 
+            add_account_to_display_data(
+                "display_data_success_accounts.json",
+                self.account_name,
+                "",
+                user_mining.get("gotAmount", 0),
+            )
+
+            inc_display_data(
+                "display_data.json",
+                "success_accounts",
+                {"title": "Successfull farm finished accounts", "name": "count"},
+            )
         except Exception as e:
+            add_account_to_display_data(
+                "display_data_bot_issues.json", self.account_name
+            )
             self.log.error(
                 f"<cyan>{self.account_name}</cyan> | <r>⭕ failed to run!</r>"
             )
